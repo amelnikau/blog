@@ -1,47 +1,44 @@
-const blogs = {};
+const blogModel = require("../models/blog_model");
 
-function getAllBlogs() {
-    let result = [];
-    for(let blogId in blogs) {
-        result.push(blogs[blogId]);
-    }
-    return result;
+async function getAllBlogs() {
+    return await blogModel.find({}).exec();
 }
 
-function getBlogById(id) {
-    if (blogs[id]) {
-        return blogs[id];
+async function getBlogById(id) {
+    let blog = await blogModel.findById(id).exec();
+    if (!blog) {
+        throw Error(`No blog with id ${id} found`);
     }
-    throw Error(`No blog with id ${id} found`);
+    return blog;
 }
 
-function updateBlog(blog) {
-    let id = blog ? blog.id : undefined;
-    if (blogs[id]) {
-        blogs[id] = blog;
-        return blog;
+async function updateBlog(blog) {
+    let id = blog ? blog._id : undefined;
+    let existingBlog = await blogModel.findById(id).exec();
+    if (!existingBlog) {
+        throw Error(`No blog with id ${id} found`);
     }
-    throw Error(`No blog with id ${id} found`);
+    await existingBlog.update(blog);
+    return await blogModel.findById(id).exec();
 }
 
-function deleteBlog(id) {
-    if (blogs[id]) {
-        delete blogs[id];
-        return;
+async function deleteBlog(id) {
+    let blog = await blogModel.findById(id).exec();
+    if (!blog) {
+        throw Error(`No blog with id ${id} found`);
     }
-    throw Error(`No blog with id ${id} found`);
+    await blog.remove();
 }
 
-function createBlog(blog) {
-    let id = blog ? blog.id : undefined;
+async function createBlog(new_blog) {
+    let id = new_blog ? new_blog._id : undefined;
     if (!id) {
         throw Error("Cannot create undefined blog or blog with undefined id");
     }
-    if (blogs[id]) {
+    if (await blogModel.findById(id).exec()) {
         throw Error("Blog already exists, please try update api");
     }
-    blogs[id] = blog;
-    return blogs[id];
+    return await blogModel.create(new_blog);
 }
 
 module.exports = {

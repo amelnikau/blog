@@ -1,28 +1,40 @@
 let express = require('express');
 let blogController = require("../controllers/blog_controller");
+const {to} = require("await-to-js");
+const passport = require("../auth/passport_jwt_strategy");
 
 let blogRouter = new express.Router();
 
-blogRouter.get("/blogs", function (req, res) {
-    res.status(200).json(blogController.getAllBlogs());
+blogRouter.use("*", passport.authenticate('jwt', { session: false }));
+
+blogRouter.get("/blogs", async function (req, res, next) {
+    let [err, blogs] = await to(blogController.getAllBlogs());
+    if (err) next(err);
+    else res.status(200).json(blogs);
 });
 
-blogRouter.get("/blog/:id", function (req, res) {
-    res.status(200).json(blogController.getBlogById(req.params.id));
+blogRouter.get("/blog/:id", async function (req, res, next) {
+    let [err, blog] = await to(blogController.getBlogById(req.params.id));
+    if (err) next(err);
+    else res.status(200).json(blog);
 });
 
-blogRouter.post("/blog", (req, res) => {
-    res.status(201).json(blogController.createBlog(req.body));
+blogRouter.post("/blog", async (req, res, next) => {
+    let [err, blog] = await to(blogController.createBlog(req.body));
+    if (err) next(err);
+    else res.status(201).json(blog);
 });
 
-blogRouter.delete("/blog/:id", function (req, res) {
-    blogController.deleteBlog(req.params.id);
-    res.status(204).send();
+blogRouter.delete("/blog/:id", async function (req, res, next) {
+    let [err, blog] = await to(blogController.deleteBlog(req.params.id));
+    if (err) next(err);
+    else res.status(204).send();
 });
 
-blogRouter.put("/blog", function (req, res) {
-    res.status(200).json(blogController.updateBlog(req.body));
+blogRouter.put("/blog", async function (req, res, next) {
+    let [err, blog] = await to(blogController.updateBlog(req.body));
+    if (err) next(err);
+    else res.status(200).json(blog);
 });
-
 
 module.exports = blogRouter;
