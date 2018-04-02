@@ -27,3 +27,9 @@ As a response you will get something like that:
 Received token should be used in all requests to /blog* API
 
 Use it in "Authorization" header in format "JWT <TOKEN_VALUE>"
+
+To run tests:
+* npm install
+* npm test (executes all unit tests)
+* npm run coverage (shows coverage for tested files)
+* npm run coverage_all (shows coverage for all files in the project)
